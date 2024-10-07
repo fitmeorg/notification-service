@@ -7,4 +7,5 @@ export default registerAs('mail', () => ({
   clientSecret: process.env.OAUTH_CLIENT_SECRET,
   refreshToken: process.env.OAUTH_REFRESH_TOKEN,
   htmlWelcomeTemplate: process.env.HTML_WELCOME_TEMPLATE,
+  htmlRemoveStreakTemplate: process.env.HTML_REMOVE_STREAK_TEMPLATE,
 }));
