@@ -55,14 +55,21 @@ export class NotificationConsumer extends WorkerHost {
     const compileTemplate = Handlebars.compile(templateContent);
 
     for (const user of job.data.users) {
+      const userDocument = await this.notificationRepository.findOneOrFail({
+        user,
+      });
+
       const compiledHtml = compileTemplate(
-        selectedTemplate.templateVariables(user),
+        selectedTemplate.templateVariables({
+          mail: userDocument.mail,
+          username: userDocument.username,
+        }),
       );
 
       await this.transporter.sendMail({
         from: 'herrera.clip@gmail.com',
-        to: `${user.mail}`,
-        subject: selectedTemplate.emailSubject(user.username),
+        to: `${userDocument.mail}`,
+        subject: selectedTemplate.emailSubject(userDocument.username),
         text: job.data.plainText,
         html: compiledHtml,
       });
