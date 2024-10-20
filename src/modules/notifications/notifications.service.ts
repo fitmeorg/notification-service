@@ -1,16 +1,35 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
-import { MailService } from '../mail/mail.service';
+import { Queue } from 'bullmq';
 import { AccountCreatedEvent } from 'src/common/events/account.events';
+import { RemoveStreakEvent } from 'src/common/events/removeStreak';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly mailService: MailService) {}
+  constructor(@InjectQueue('notification') private notificationQueue: Queue) {}
 
-  async welcome(data: AccountCreatedEvent) {
-    this.mailService.sendMail(
-      'welcome',
-      data,
-      `Bienvenido ${data.name} a fitme`,
+  async welcome(users: AccountCreatedEvent) {
+    this.notificationQueue.add(
+      'mail',
+      {
+        templateName: 'welcome',
+        users,
+      },
+      { attempts: 1 },
+    );
+  }
+
+  async removeStreak(users: RemoveStreakEvent) {
+    this.notificationQueue.add(
+      'mail',
+      {
+        templateName: 'warningRemoveStreak',
+        users,
+      },
+      {
+        attempts: 1,
+        removeOnFail: true,
+      },
     );
   }
 }
